@@ -218,9 +218,12 @@
       <span class="info-value highlight" id="chipIdDisplay">—</span>
     </div>
     <div class="terminal" id="terminal"><span class="line-acc">Waiting for device...</span></div>
-    <div style="margin-top:16px; display:flex; gap:10px;">
+    <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
       <button class="btn-primary" id="btnConnect" onclick="connectSerial()">
         ⚡ Connect USB
+      </button>
+      <button class="btn-outline" id="btnRequestId" onclick="requestId()" disabled>
+        Request Chip ID
       </button>
       <button class="btn-outline" id="btnDisconnect" onclick="disconnectSerial()" disabled>
         Disconnect
@@ -313,6 +316,7 @@
       document.getElementById('connBadge').className    = 'badge badge-ok';
       document.getElementById('btnConnect').disabled    = true;
       document.getElementById('btnDisconnect').disabled = false;
+      document.getElementById('btnRequestId').disabled  = false;
       log('Serial port opened at 115200 baud.', 'line-ok');
 
       // Set up writer
@@ -320,6 +324,9 @@
 
       // Read loop
       readLoop();
+
+      // Request chip ID automatically (device may have booted before we connected)
+      setTimeout(() => requestId(), 500);
     } catch (e) {
       log('Connection failed: ' + e.message, 'line-err');
     }
@@ -363,6 +370,13 @@
     } catch (e) {
       log('Connection lost: ' + e.message, 'line-err');
     }
+  }
+
+  async function requestId() {
+    if (!writer) return;
+    const enc = new TextEncoder();
+    await writer.write(enc.encode('LIC:INFO\n'));
+    log('Requesting Chip ID...', 'line-acc');
   }
 
   async function sendActivation() {
