@@ -416,11 +416,8 @@
       if (writer) { writer.releaseLock(); writer = null; }
       if (port)   { await port.close();   port   = null; }
     } catch(_) {}
-    document.getElementById('connBadge').textContent  = 'Disconnected';
-    document.getElementById('connBadge').className    = 'badge badge-waiting';
-    document.getElementById('btnConnect').disabled    = false;
-    document.getElementById('btnDisconnect').disabled = true;
-    log('Disconnected.', 'line-err');
+    // Reload page to fully release the serial port — safe to upload firmware after this
+    location.reload();
   }
 </script>
 </body>
