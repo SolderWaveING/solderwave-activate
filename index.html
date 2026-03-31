@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SolderWave — Device Activation</title>
+  <style>
+    :root {
+      --bg:      #0d0d0d;
+      --panel:   #1a1a1a;
+      --border:  #2e2e2e;
+      --accent:  #f0a500;
+      --green:   #3ecf6e;
+      --red:     #e05a5a;
+      --text:    #e8e8e8;
+      --muted:   #888;
+      --font:    'Segoe UI', system-ui, sans-serif;
+      --mono:    'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    header img { height: 64px; margin-bottom: 12px; }
+    header h1 { font-size: 1.6rem; color: var(--accent); letter-spacing: 0.04em; }
+    header p  { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Step indicators */
+    .steps {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .step {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .step.done    { background: var(--green); }
+    .step.active  { background: var(--accent); }
+
+    /* Buttons */
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary  { background: var(--accent); color: #000; font-weight: 600; }
+    .btn-success  { background: var(--green);  color: #000; font-weight: 600; }
+    .btn-danger   { background: var(--red);    color: #fff; font-weight: 600; }
+    .btn-outline  { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+    /* Info rows */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--muted); }
+    .info-value { font-family: var(--mono); font-size: 0.95rem; color: var(--text); }
+    .info-value.highlight { color: var(--accent); font-weight: 600; letter-spacing: 0.1em; }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-waiting  { background: #2e2e1a; color: var(--accent); }
+    .badge-ok       { background: #1a2e1a; color: var(--green);  }
+    .badge-error    { background: #2e1a1a; color: var(--red);    }
+
+    /* Terminal log */
+    .terminal {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      height: 120px;
+      overflow-y: auto;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-top: 12px;
+    }
+    .terminal .line-ok  { color: var(--green); }
+    .terminal .line-err { color: var(--red);   }
+    .terminal .line-acc { color: var(--accent);}
+
+    /* Key input */
+    .key-input-wrap {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    input[type="text"] {
+      flex: 1;
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 1rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--muted); letter-spacing: normal; text-transform: none; }
+
+    .notice {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    /* Browser warning */
+    .browser-warn {
+      background: #2e1a00;
+      border: 1px solid #6b4200;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 0.88rem;
+      color: #ffb347;
+      margin-bottom: 20px;
+      max-width: 560px;
+      width: 100%;
+      display: none;
+    }
+
+    footer {
+      margin-top: 32px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-align: center;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>SolderWave</h1>
+    <p>Bench Power Supply — Device Activation</p>
+  </header>
+
+  <div class="browser-warn" id="browserWarn">
+    ⚠ Web Serial requires <strong>Chrome</strong> or <strong>Edge</strong> (version 89+).
+    Please open this page in one of those browsers.
+  </div>
+
+  <!-- Progress steps -->
+  <div class="steps" style="max-width:560px;width:100%;">
+    <div class="step active"  id="s1"></div>
+    <div class="step"         id="s2"></div>
+    <div class="step"         id="s3"></div>
+  </div>
+
+  <!-- Step 1: Connect -->
+  <div class="card" id="cardConnect">
+    <h2>Step 1 — Connect Device</h2>
+    <div class="info-row">
+      <span class="info-label">Connection</span>
+      <span class="badge badge-waiting" id="connBadge">Not connected</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Chip ID</span>
+      <span class="info-value highlight" id="chipIdDisplay">—</span>
+    </div>
+    <div class="terminal" id="terminal"><span class="line-acc">Waiting for device...</span></div>
+    <div style="margin-top:16px; display:flex; gap:10px;">
+      <button class="btn-primary" id="btnConnect" onclick="connectSerial()">
+        ⚡ Connect USB
+      </button>
+      <button class="btn-outline" id="btnDisconnect" onclick="disconnectSerial()" disabled>
+        Disconnect
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Enter Key -->
+  <div class="card" id="cardKey" style="opacity:0.4;pointer-events:none;">
+    <h2>Step 2 — Enter Activation Key</h2>
+    <p class="notice">
+      Your 8-character activation key was provided by SolderWave.<br>
+      Contact <a href="mailto:support@solderwave.ing" style="color:var(--accent)">support@solderwave.ing</a> if you don't have one.
+    </p>
+    <div class="key-input-wrap">
+      <input type="text" id="keyInput" maxlength="8" placeholder="XXXXXXXX" />
+      <button class="btn-success" id="btnActivate" onclick="sendActivation()" disabled>
+        Activate
+      </button>
+    </div>
+    <div class="terminal" id="terminalKey" style="height:80px;margin-top:12px;"></div>
+  </div>
+
+  <!-- Step 3: Result -->
+  <div class="card" id="cardResult" style="display:none;">
+    <h2>Step 3 — Activation Result</h2>
+    <div class="info-row">
+      <span class="info-label">Status</span>
+      <span class="badge" id="resultBadge">—</span>
+    </div>
+    <p class="notice" id="resultMsg" style="margin-top:12px;"></p>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 SolderWave — <a href="mailto:support@solderwave.ing">support@solderwave.ing</a></p>
+  </footer>
+
+<script>
+  let port   = null;
+  let reader = null;
+  let writer = null;
+  let chipId = null;
+
+  // Check browser support
+  if (!('serial' in navigator)) {
+    document.getElementById('browserWarn').style.display = 'block';
+    document.getElementById('btnConnect').disabled = true;
+  }
+
+  function log(msg, cls) {
+    const t = document.getElementById('terminal');
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = msg;
+    t.appendChild(line);
+    t.scrollTop = t.scrollHeight;
+  }
+
+  function logKey(msg, cls) {
+    const t = document.getElementById('terminalKey');
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = msg;
+    t.appendChild(line);
+    t.scrollTop = t.scrollHeight;
+  }
+
+  function setStep(n) {
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById('s' + i);
+      el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+  }
+
+  function unlockKeyCard() {
+    const card = document.getElementById('cardKey');
+    card.style.opacity = '1';
+    card.style.pointerEvents = 'auto';
+    document.getElementById('btnActivate').disabled = false;
+    document.getElementById('keyInput').focus();
+    setStep(2);
+  }
+
+  async function connectSerial() {
+    try {
+      port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 115200 });
+
+      document.getElementById('connBadge').textContent  = 'Connected';
+      document.getElementById('connBadge').className    = 'badge badge-ok';
+      document.getElementById('btnConnect').disabled    = true;
+      document.getElementById('btnDisconnect').disabled = false;
+      log('Serial port opened at 115200 baud.', 'line-ok');
+
+      // Set up writer
+      writer = port.writable.getWriter();
+
+      // Read loop
+      readLoop();
+    } catch (e) {
+      log('Connection failed: ' + e.message, 'line-err');
+    }
+  }
+
+  async function readLoop() {
+    const decoder = new TextDecoderStream();
+    port.readable.pipeTo(decoder.writable);
+    reader = decoder.readable.getReader();
+
+    let buffer = '';
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += value;
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          log(trimmed);
+
+          // Auto-detect chip ID from licence output
+          const m = trimmed.match(/Chip ID[:\s]+([0-9A-Fa-f]{12})/i);
+          if (m && !chipId) {
+            chipId = m[1].toUpperCase();
+            document.getElementById('chipIdDisplay').textContent = chipId;
+            log('Chip ID captured: ' + chipId, 'line-ok');
+            unlockKeyCard();
+          }
+
+          // Detect activation result
+          if (trimmed.includes('ACTIVATION SUCCESS')) {
+            showResult(true);
+          } else if (trimmed.includes('INVALID KEY')) {
+            logKey('Invalid key — check and try again.', 'line-err');
+          }
+        }
+      }
+    } catch (e) {
+      log('Connection lost: ' + e.message, 'line-err');
+    }
+  }
+
+  async function sendActivation() {
+    const key = document.getElementById('keyInput').value.trim().toUpperCase();
+    if (key.length !== 8) {
+      logKey('Key must be exactly 8 characters.', 'line-err');
+      return;
+    }
+    if (!writer) {
+      logKey('No serial connection.', 'line-err');
+      return;
+    }
+    const cmd = 'LIC:ACTIVATE ' + key + '\n';
+    const enc  = new TextEncoder();
+    await writer.write(enc.encode(cmd));
+    logKey('Sent: ' + cmd.trim(), 'line-acc');
+    setStep(3);
+  }
+
+  function showResult(success) {
+    const card  = document.getElementById('cardResult');
+    const badge = document.getElementById('resultBadge');
+    const msg   = document.getElementById('resultMsg');
+    card.style.display = 'block';
+    if (success) {
+      badge.textContent = 'Activated';
+      badge.className   = 'badge badge-ok';
+      msg.textContent   = 'Your device has been successfully activated and will reboot now. Thank you for choosing SolderWave.';
+      setStep(3);
+      document.getElementById('s3').className = 'step done';
+    }
+  }
+
+  async function disconnectSerial() {
+    try {
+      if (reader) { await reader.cancel(); reader = null; }
+      if (writer) { writer.releaseLock(); writer = null; }
+      if (port)   { await port.close();   port   = null; }
+    } catch(_) {}
+    document.getElementById('connBadge').textContent  = 'Disconnected';
+    document.getElementById('connBadge').className    = 'badge badge-waiting';
+    document.getElementById('btnConnect').disabled    = false;
+    document.getElementById('btnDisconnect').disabled = true;
+    log('Disconnected.', 'line-err');
+  }
+</script>
+</body>
+</html>
