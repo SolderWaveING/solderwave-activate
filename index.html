@@ -233,11 +233,18 @@
 
   <!-- Step 2: Enter Key -->
   <div class="card" id="cardKey" style="opacity:0.4;pointer-events:none;">
-    <h2>Step 2 — Enter Activation Key</h2>
-    <p class="notice">
+    <h2 id="step2Title">Step 2 — Enter Activation Key</h2>
+    <p class="notice" id="step2Notice">
       Your 8-character activation key was provided by SolderWave.<br>
       Contact <a href="mailto:support@solderwave.ing" style="color:var(--accent)">support@solderwave.ing</a> if you don't have one.
     </p>
+    <!-- Lockout warning — hidden by default -->
+    <div id="lockoutWarn" style="display:none; background:#2e1a1a; border:1px solid #6b2222;
+         border-radius:6px; padding:12px 16px; margin-bottom:12px; color:#e05a5a; font-size:0.88rem; line-height:1.6;">
+      ⛔ This device is <strong>LOCKED OUT</strong> after 3 failed activation attempts.<br>
+      Contact <a href="mailto:support@solderwave.ing" style="color:#e05a5a">support@solderwave.ing</a>
+      to purchase an unlock key (€5).
+    </div>
     <div class="key-input-wrap">
       <input type="text" id="keyInput" maxlength="8" placeholder="XXXXXXXX" />
       <button class="btn-success" id="btnActivate" onclick="sendActivation()" disabled>
@@ -262,10 +269,11 @@
   </footer>
 
 <script>
-  let port   = null;
-  let reader = null;
-  let writer = null;
-  let chipId = null;
+  let port      = null;
+  let reader    = null;
+  let writer    = null;
+  let chipId    = null;
+  let isLockedOut = false;
 
   // Check browser support
   if (!('serial' in navigator)) {
@@ -359,10 +367,20 @@
             unlockKeyCard();
           }
 
-          // Detect activation result
+          // Detect lockout status
+          if (trimmed.includes('Status: LOCKED OUT') || trimmed.includes('LOCKED OUT')) {
+            if (!isLockedOut) {
+              isLockedOut = true;
+              switchToUnlockMode();
+            }
+          }
+
+          // Detect activation/unlock result
           if (trimmed.includes('ACTIVATION SUCCESS')) {
-            showResult(true);
-          } else if (trimmed.includes('INVALID KEY')) {
+            showResult(true, false);
+          } else if (trimmed.includes('UNLOCK SUCCESS')) {
+            showResult(true, true);
+          } else if (trimmed.includes('INVALID KEY') || trimmed.includes('INVALID UNLOCK KEY')) {
             logKey('Invalid key — check and try again.', 'line-err');
           }
         }
@@ -370,6 +388,16 @@
     } catch (e) {
       log('Connection lost: ' + e.message, 'line-err');
     }
+  }
+
+  function switchToUnlockMode() {
+    document.getElementById('step2Title').textContent  = 'Step 2 — Enter Unlock Key';
+    document.getElementById('step2Notice').style.display = 'none';
+    document.getElementById('lockoutWarn').style.display = 'block';
+    document.getElementById('btnActivate').textContent = 'Unlock';
+    document.getElementById('btnActivate').className   = 'btn-danger';
+    log('Device is LOCKED OUT — switch to unlock key.', 'line-err');
+    unlockKeyCard();
   }
 
   async function requestId() {
@@ -389,22 +417,28 @@
       logKey('No serial connection.', 'line-err');
       return;
     }
-    const cmd = 'LIC:ACTIVATE ' + key + '\n';
+    const cmd = (isLockedOut ? 'LIC:UNLOCK ' : 'LIC:ACTIVATE ') + key + '\n';
     const enc  = new TextEncoder();
     await writer.write(enc.encode(cmd));
     logKey('Sent: ' + cmd.trim(), 'line-acc');
     setStep(3);
   }
 
-  function showResult(success) {
+  function showResult(success, wasUnlock) {
     const card  = document.getElementById('cardResult');
     const badge = document.getElementById('resultBadge');
     const msg   = document.getElementById('resultMsg');
     card.style.display = 'block';
     if (success) {
-      badge.textContent = 'Activated';
-      badge.className   = 'badge badge-ok';
-      msg.textContent   = 'Your device has been successfully activated and will reboot now. Thank you for choosing SolderWave.';
+      if (wasUnlock) {
+        badge.textContent = 'Unlocked';
+        badge.className   = 'badge badge-ok';
+        msg.textContent   = 'Device unlocked successfully. It will reboot to the activation screen. You can now activate it with a new activation key (€10).';
+      } else {
+        badge.textContent = 'Activated';
+        badge.className   = 'badge badge-ok';
+        msg.textContent   = 'Your device has been successfully activated and will reboot now. Thank you for choosing SolderWave.';
+      }
       setStep(3);
       document.getElementById('s3').className = 'step done';
     }
