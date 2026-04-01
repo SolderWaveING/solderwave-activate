@@ -31,182 +31,228 @@
       padding: 40px 16px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 36px;
-    }
-    header img { height: 64px; margin-bottom: 12px; }
+    header { text-align: center; margin-bottom: 24px; }
     header h1 { font-size: 1.6rem; color: var(--accent); letter-spacing: 0.04em; }
     header p  { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
 
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      max-width: 640px;
+      width: 100%;
+      margin-bottom: 0;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 11px 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: color 0.2s, background 0.2s;
+    }
+    .tab-btn:first-child { border-radius: 8px 0 0 0; }
+    .tab-btn:last-child  { border-radius: 0 8px 0 0; }
+    .tab-btn.active {
+      background: #1f1f1f;
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Card ── */
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 0 0 10px 10px;
       padding: 28px;
       width: 100%;
-      max-width: 560px;
+      max-width: 640px;
       margin-bottom: 20px;
     }
+    .card.rounded { border-radius: 10px; }
     .card h2 {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: var(--accent);
       margin-bottom: 18px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
-    /* Step indicators */
-    .steps {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 28px;
-    }
-    .step {
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--border);
-      transition: background 0.3s;
-    }
-    .step.done    { background: var(--green); }
-    .step.active  { background: var(--accent); }
+    /* ── Steps ── */
+    .steps { display: flex; gap: 8px; margin-bottom: 20px; }
+    .step  { flex: 1; height: 4px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+    .step.done   { background: var(--green); }
+    .step.active { background: var(--accent); }
 
-    /* Buttons */
+    /* ── Buttons ── */
     button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      font-family: var(--font);
-      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 10px 22px; border: none; border-radius: 6px;
+      font-size: 0.95rem; font-family: var(--font); cursor: pointer;
       transition: opacity 0.2s;
     }
     button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-primary  { background: var(--accent); color: #000; font-weight: 600; }
-    .btn-success  { background: var(--green);  color: #000; font-weight: 600; }
-    .btn-danger   { background: var(--red);    color: #fff; font-weight: 600; }
-    .btn-outline  { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-primary { background: var(--accent); color: #000; font-weight: 600; }
+    .btn-success { background: var(--green);  color: #000; font-weight: 600; }
+    .btn-danger  { background: var(--red);    color: #fff; font-weight: 600; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
 
-    /* Info rows */
+    /* ── Info rows ── */
     .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem;
     }
     .info-row:last-child { border-bottom: none; }
-    .info-label { color: var(--muted); }
-    .info-value { font-family: var(--mono); font-size: 0.95rem; color: var(--text); }
+    .info-label  { color: var(--muted); }
+    .info-value  { font-family: var(--mono); font-size: 0.95rem; color: var(--text); }
     .info-value.highlight { color: var(--accent); font-weight: 600; letter-spacing: 0.1em; }
 
-    /* Status badge */
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
+    /* ── Badge ── */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
     .badge-waiting  { background: #2e2e1a; color: var(--accent); }
     .badge-ok       { background: #1a2e1a; color: var(--green);  }
     .badge-error    { background: #2e1a1a; color: var(--red);    }
 
-    /* Terminal log */
+    /* ── Terminal ── */
     .terminal {
-      background: #0a0a0a;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px;
-      height: 120px;
-      overflow-y: auto;
-      font-family: var(--mono);
-      font-size: 0.8rem;
-      color: #aaa;
-      margin-top: 12px;
+      background: #0a0a0a; border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px; height: 120px; overflow-y: auto;
+      font-family: var(--mono); font-size: 0.8rem; color: #aaa; margin-top: 12px;
     }
     .terminal .line-ok  { color: var(--green); }
     .terminal .line-err { color: var(--red);   }
     .terminal .line-acc { color: var(--accent);}
 
-    /* Key input */
-    .key-input-wrap {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
+    /* ── Key input ── */
+    .key-input-wrap { display: flex; gap: 10px; margin-top: 12px; }
+    input[type="text"], input[type="email"] {
+      flex: 1; background: #0a0a0a; border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 14px; color: var(--text);
+      font-family: var(--font); font-size: 0.95rem; outline: none;
     }
-    input[type="text"] {
-      flex: 1;
-      background: #0a0a0a;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 1rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      outline: none;
-    }
-    input[type="text"]:focus { border-color: var(--accent); }
-    input[type="text"]::placeholder { color: var(--muted); letter-spacing: normal; text-transform: none; }
+    input[type="text"]:focus,
+    input[type="email"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder { color: var(--muted); }
+    input.mono { font-family: var(--mono); letter-spacing: 0.12em; text-transform: uppercase; }
 
     .notice {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-top: 10px;
-      line-height: 1.5;
+      font-size: 0.82rem; color: var(--muted);
+      margin-top: 10px; line-height: 1.5;
     }
 
-    /* Browser warning */
+    /* ── Form ── */
+    .form-grid { display: flex; flex-direction: column; gap: 14px; }
+    .form-row  { display: flex; flex-direction: column; gap: 5px; }
+    .form-row label { font-size: 0.82rem; color: var(--muted); }
+    .form-row input { flex: 1; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .field-ok  { border-color: var(--green)  !important; }
+    .field-err { border-color: var(--red)    !important; }
+
+    /* ── Order summary box ── */
+    .order-box {
+      background: #0f1f0f; border: 1px solid #2a4a2a;
+      border-radius: 8px; padding: 16px 20px; margin: 18px 0;
+    }
+    .order-box .row {
+      display: flex; justify-content: space-between;
+      font-size: 0.9rem; padding: 4px 0;
+    }
+    .order-box .row.total {
+      border-top: 1px solid #2a4a2a; margin-top: 8px;
+      padding-top: 10px; font-weight: 700; font-size: 1rem;
+    }
+    .order-box .row .lbl { color: var(--muted); }
+    .order-box .row .val { color: var(--text); }
+    .order-box .row.total .val { color: var(--green); font-size: 1.1rem; }
+
+    /* ── Payment dummy ── */
+    .payment-box {
+      background: #101828; border: 1px solid #1e3a5f;
+      border-radius: 8px; padding: 18px 20px; margin: 18px 0;
+    }
+    .payment-box h3 {
+      font-size: 0.9rem; color: #60a8e0; margin-bottom: 14px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .card-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+    .payment-box input {
+      background: #0a1520; border: 1px solid #1e3a5f;
+      color: var(--text); font-family: var(--mono);
+    }
+    .payment-box input:focus { border-color: #60a8e0; }
+
+    .dummy-note {
+      font-size: 0.78rem; color: #60a8e0; margin-top: 8px;
+      background: #091220; padding: 8px 12px; border-radius: 4px;
+    }
+
+    /* ── Status card ── */
+    .status-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 10px; padding: 28px; max-width: 640px;
+      width: 100%; display: none; text-align: center;
+    }
+    .status-icon { font-size: 3rem; margin-bottom: 12px; }
+    .status-card h2 { font-size: 1.2rem; margin-bottom: 8px; }
+    .status-card p  { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+
+    /* ── Browser warn ── */
     .browser-warn {
-      background: #2e1a00;
-      border: 1px solid #6b4200;
-      border-radius: 8px;
-      padding: 14px 18px;
-      font-size: 0.88rem;
-      color: #ffb347;
-      margin-bottom: 20px;
-      max-width: 560px;
-      width: 100%;
-      display: none;
+      background: #2e1a00; border: 1px solid #6b4200; border-radius: 8px;
+      padding: 14px 18px; font-size: 0.88rem; color: #ffb347;
+      margin-bottom: 20px; max-width: 640px; width: 100%; display: none;
     }
 
-    footer {
-      margin-top: 32px;
-      color: var(--muted);
-      font-size: 0.8rem;
-      text-align: center;
-    }
+    footer { margin-top: 32px; color: var(--muted); font-size: 0.8rem; text-align: center; }
     footer a { color: var(--muted); text-decoration: none; }
+
+    /* Step indicators for activate tab */
+    #activateSteps { max-width: 640px; width: 100%; margin-bottom: 0; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>SolderWave</h1>
-    <p>Bench Power Supply — Device Activation</p>
-  </header>
+<header>
+  <h1>SolderWave</h1>
+  <p>Bench Power Supply — Activation &amp; Licensing</p>
+</header>
 
-  <div class="browser-warn" id="browserWarn">
-    ⚠ Web Serial requires <strong>Chrome</strong> or <strong>Edge</strong> (version 89+).
-    Please open this page in one of those browsers.
+<div class="browser-warn" id="browserWarn">
+  ⚠ Web Serial requires <strong>Chrome</strong> or <strong>Edge</strong> (version 89+).
+  Please open this page in one of those browsers to use the Activate tab.
+</div>
+
+<!-- ── Tab bar ── -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('activate')">⚡ Activate Device</button>
+  <button class="tab-btn"       onclick="switchTab('buy')">🛒 Buy Licence Key</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 1 — ACTIVATE
+     ══════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-activate" style="width:100%;max-width:640px;">
+
+  <div class="steps" id="activateSteps">
+    <div class="step active" id="s1"></div>
+    <div class="step"        id="s2"></div>
+    <div class="step"        id="s3"></div>
   </div>
 
-  <!-- Progress steps -->
-  <div class="steps" style="max-width:560px;width:100%;">
-    <div class="step active"  id="s1"></div>
-    <div class="step"         id="s2"></div>
-    <div class="step"         id="s3"></div>
-  </div>
-
-  <!-- Step 1: Connect -->
+  <!-- Step 1 -->
   <div class="card" id="cardConnect">
     <h2>Step 1 — Connect Device</h2>
     <div class="info-row">
@@ -219,26 +265,20 @@
     </div>
     <div class="terminal" id="terminal"><span class="line-acc">Waiting for device...</span></div>
     <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
-      <button class="btn-primary" id="btnConnect" onclick="connectSerial()">
-        ⚡ Connect USB
-      </button>
-      <button class="btn-outline" id="btnRequestId" onclick="requestId()" disabled>
-        Request Chip ID
-      </button>
-      <button class="btn-outline" id="btnDisconnect" onclick="disconnectSerial()" disabled>
-        Disconnect
-      </button>
+      <button class="btn-primary"  id="btnConnect"    onclick="connectSerial()">⚡ Connect USB</button>
+      <button class="btn-outline"  id="btnRequestId"  onclick="requestId()"         disabled>Request Chip ID</button>
+      <button class="btn-outline"  id="btnDisconnect" onclick="disconnectSerial()"   disabled>Disconnect</button>
     </div>
   </div>
 
-  <!-- Step 2: Enter Key -->
+  <!-- Step 2 -->
   <div class="card" id="cardKey" style="opacity:0.4;pointer-events:none;">
     <h2 id="step2Title">Step 2 — Enter Activation Key</h2>
     <p class="notice" id="step2Notice">
       Your 8-character activation key was provided by SolderWave.<br>
-      Contact <a href="mailto:support@solderwave.ing" style="color:var(--accent)">support@solderwave.ing</a> if you don't have one.
+      Don't have one? <a href="#" onclick="switchTab('buy'); return false;"
+        style="color:var(--accent)">Buy a licence key →</a>
     </p>
-    <!-- Lockout warning — hidden by default -->
     <div id="lockoutWarn" style="display:none; background:#2e1a1a; border:1px solid #6b2222;
          border-radius:6px; padding:12px 16px; margin-bottom:12px; color:#e05a5a; font-size:0.88rem; line-height:1.6;">
       ⛔ This device is <strong>LOCKED OUT</strong> after 3 failed activation attempts.<br>
@@ -246,15 +286,13 @@
       to purchase an unlock key (€5).
     </div>
     <div class="key-input-wrap">
-      <input type="text" id="keyInput" maxlength="8" placeholder="XXXXXXXX" />
-      <button class="btn-success" id="btnActivate" onclick="sendActivation()" disabled>
-        Activate
-      </button>
+      <input type="text" id="keyInput" class="mono" maxlength="8" placeholder="XXXXXXXX" />
+      <button class="btn-success" id="btnActivate" onclick="sendActivation()" disabled>Activate</button>
     </div>
     <div class="terminal" id="terminalKey" style="height:80px;margin-top:12px;"></div>
   </div>
 
-  <!-- Step 3: Result -->
+  <!-- Step 3 -->
   <div class="card" id="cardResult" style="display:none;">
     <h2>Step 3 — Activation Result</h2>
     <div class="info-row">
@@ -264,18 +302,333 @@
     <p class="notice" id="resultMsg" style="margin-top:12px;"></p>
   </div>
 
-  <footer>
-    <p>&copy; 2026 SolderWave — <a href="mailto:support@solderwave.ing">support@solderwave.ing</a></p>
-  </footer>
+</div><!-- /tab-activate -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 2 — BUY LICENCE
+     ══════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-buy" style="width:100%;max-width:640px;">
+<div class="card rounded">
+
+  <!-- Buy steps -->
+  <div class="steps" id="buySteps">
+    <div class="step active" id="b1"></div>
+    <div class="step"        id="b2"></div>
+    <div class="step"        id="b3"></div>
+  </div>
+
+  <!-- ── Step 1: Your Details ── -->
+  <div id="buyStep1">
+    <h2>Step 1 — Your Details</h2>
+
+    <div class="form-grid">
+      <div class="form-row-2">
+        <div class="form-row">
+          <label for="buyName">Full name *</label>
+          <input type="text" id="buyName" placeholder="Carlo van Hal" />
+        </div>
+        <div class="form-row">
+          <label for="buyEmail">Email address *</label>
+          <input type="email" id="buyEmail" placeholder="you@email.com" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="buyChip">Chip ID * <span style="color:var(--muted);font-size:0.78rem;">(12 hex characters — shown on device boot screen)</span></label>
+        <input type="text" id="buyChip" class="mono" maxlength="12" placeholder="F4F596A7DBCC"
+               oninput="validateChip()" />
+      </div>
+
+      <div class="form-row">
+        <label for="buyNotes">Notes / order reference <span style="color:var(--muted);font-size:0.78rem;">(optional)</span></label>
+        <input type="text" id="buyNotes" placeholder="e.g. Tindie order #1234" />
+      </div>
+    </div>
+
+    <p class="notice" style="margin-top:16px;">
+      Your chip ID is displayed on the device screen at startup.<br>
+      It looks like: <span style="font-family:var(--mono);color:var(--accent);">F4F596A7DBCC</span>
+    </p>
+
+    <div style="margin-top:20px;">
+      <button class="btn-primary" id="btnBuyNext1" onclick="buyNext1()" disabled>
+        Continue to Payment →
+      </button>
+    </div>
+    <p id="buyStep1Status" class="notice" style="margin-top:10px;color:var(--red);"></p>
+  </div>
+
+  <!-- ── Step 2: Payment ── -->
+  <div id="buyStep2" style="display:none;">
+    <h2>Step 2 — Payment</h2>
+
+    <!-- Order summary -->
+    <div class="order-box">
+      <div class="row"><span class="lbl">Product</span><span class="val">SolderWave SMBP V1 — Activation Key</span></div>
+      <div class="row"><span class="lbl">Chip ID</span><span class="val mono" id="summaryChip" style="font-family:var(--mono);color:var(--accent);"></span></div>
+      <div class="row"><span class="lbl">Customer</span><span class="val" id="summaryName"></span></div>
+      <div class="row total"><span class="lbl">Total</span><span class="val">€10.00</span></div>
+    </div>
+
+    <!-- Payment form (dummy) -->
+    <div class="payment-box">
+      <h3>💳 Card Details</h3>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Card number</label>
+          <input type="text" class="mono" placeholder="1234 5678 9012 3456" maxlength="19"
+                 oninput="fmtCard(this)" id="cardNum" />
+        </div>
+        <div class="card-row">
+          <div class="form-row">
+            <label>Cardholder name</label>
+            <input type="text" id="cardName" placeholder="Carlo van Hal" />
+          </div>
+          <div class="form-row">
+            <label>Expiry</label>
+            <input type="text" class="mono" placeholder="MM/YY" maxlength="5"
+                   oninput="fmtExpiry(this)" id="cardExp" />
+          </div>
+          <div class="form-row">
+            <label>CVC</label>
+            <input type="text" class="mono" placeholder="123" maxlength="3" id="cardCvc" />
+          </div>
+        </div>
+      </div>
+      <p class="dummy-note">
+        ℹ This is a <strong>demo payment form</strong>. No real transaction is processed.<br>
+        Enter any values and click Pay — SolderWave will contact you to complete payment.
+      </p>
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
+      <button class="btn-outline" onclick="buyBack1()">← Back</button>
+      <button class="btn-success" id="btnPay" onclick="buyPay()">
+        Pay €10.00 &amp; Get Key
+      </button>
+    </div>
+    <p id="buyStep2Status" class="notice" style="margin-top:10px;color:var(--red);"></p>
+  </div>
+
+  <!-- ── Step 3: Confirmation ── -->
+  <div id="buyStep3" style="display:none; text-align:center; padding: 20px 0;">
+    <div style="font-size:3rem; margin-bottom:12px;">✅</div>
+    <h2 style="color:var(--green); font-size:1.2rem; margin-bottom:10px;">Order Received!</h2>
+    <p style="color:var(--muted); font-size:0.9rem; line-height:1.7; max-width:420px; margin:0 auto;">
+      Thank you! Your order has been registered.<br><br>
+      SolderWave will verify your payment and email your
+      <strong style="color:var(--accent)">8-character activation key</strong>
+      to <strong id="confirmEmail" style="color:var(--text);"></strong> within
+      <strong style="color:var(--accent)">24 hours</strong>.<br><br>
+      Once you receive it, use the <a href="#" onclick="switchTab('activate'); return false;"
+        style="color:var(--accent)">⚡ Activate Device</a> tab to unlock your device.
+    </p>
+    <div style="margin-top:24px;">
+      <button class="btn-outline" onclick="buyReset()">Place Another Order</button>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-buy -->
+
+<footer>
+  <p>&copy; 2026 SolderWave — <a href="mailto:support@solderwave.ing">support@solderwave.ing</a></p>
+</footer>
 
 <script>
-  let port      = null;
-  let reader    = null;
-  let writer    = null;
-  let chipId    = null;
-  let isLockedOut = false;
+  // ── Supabase config ───────────────────────────────────────────────────────
+  const SUPABASE_URL = 'https://juzxfpcrplylliahpari.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_ymckgeXu6mYmPov9E4cguA__dgzX2L3';
 
-  // Check browser support
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['activate','buy'][i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + name);
+    });
+  }
+
+  // ── Buy tab — validation & flow ───────────────────────────────────────────
+  let _buyData = {};
+
+  function validateChip() {
+    const raw = document.getElementById('buyChip').value.replace(/[^0-9a-fA-F]/g,'').toUpperCase();
+    document.getElementById('buyChip').value = raw;
+    checkBuyStep1();
+  }
+
+  function checkBuyStep1() {
+    const name  = document.getElementById('buyName').value.trim();
+    const email = document.getElementById('buyEmail').value.trim();
+    const chip  = document.getElementById('buyChip').value.trim();
+    const valid = name.length > 1 &&
+                  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+                  chip.length === 12 &&
+                  /^[0-9A-Fa-f]{12}$/.test(chip);
+    document.getElementById('btnBuyNext1').disabled = !valid;
+  }
+
+  // Wire up live validation
+  ['buyName','buyEmail','buyChip'].forEach(id => {
+    document.getElementById(id).addEventListener('input', checkBuyStep1);
+  });
+
+  function buyNext1() {
+    const name  = document.getElementById('buyName').value.trim();
+    const email = document.getElementById('buyEmail').value.trim();
+    const chip  = document.getElementById('buyChip').value.trim().toUpperCase();
+    const notes = document.getElementById('buyNotes').value.trim();
+
+    _buyData = { name, email, chip, notes };
+
+    // Populate summary
+    document.getElementById('summaryChip').textContent = chip;
+    document.getElementById('summaryName').textContent = name;
+
+    // Save to DB immediately (status: pending_payment)
+    savePendingOrder(_buyData);
+
+    // Move to step 2
+    document.getElementById('buyStep1').style.display = 'none';
+    document.getElementById('buyStep2').style.display = 'block';
+    setBuyStep(2);
+  }
+
+  function buyBack1() {
+    document.getElementById('buyStep2').style.display = 'none';
+    document.getElementById('buyStep1').style.display = 'block';
+    setBuyStep(1);
+  }
+
+  function buyPay() {
+    const btn = document.getElementById('btnPay');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    document.getElementById('buyStep2Status').textContent = '';
+
+    // Simulate payment processing delay then confirm
+    setTimeout(() => {
+      updateOrderPaid(_buyData);
+    }, 1800);
+  }
+
+  function buyReset() {
+    ['buyName','buyEmail','buyChip','buyNotes'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('buyStep3').style.display = 'none';
+    document.getElementById('buyStep1').style.display = 'block';
+    document.getElementById('btnBuyNext1').disabled = true;
+    document.getElementById('btnPay').disabled = false;
+    document.getElementById('btnPay').textContent = 'Pay €10.00 & Get Key';
+    setBuyStep(1);
+    _buyData = {};
+  }
+
+  function setBuyStep(n) {
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById('b' + i);
+      el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+  }
+
+  // ── Supabase DB calls ─────────────────────────────────────────────────────
+  async function savePendingOrder(data) {
+    // Fetch next serial number
+    let serial = 'SMBP-V1-???';
+    try {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/License?select=serial_number&order=serial_number.desc&limit=1`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      );
+      const rows = await r.json();
+      if (rows && rows.length) {
+        const last = rows[0].serial_number || 'SMBP-V1-000';
+        const num  = parseInt(last.split('-').pop()) + 1;
+        serial = 'SMBP-V1-' + String(num).padStart(3, '0');
+      } else {
+        serial = 'SMBP-V1-001';
+      }
+    } catch(e) { serial = 'SMBP-V1-???'; }
+
+    const record = {
+      chip_id:          data.chip.toUpperCase(),
+      serial_number:    serial,
+      customer_name:    data.name,
+      customer_email:   data.email,
+      status:           'unactivated',
+      payment_status:   'pending_payment',
+      activation_date:  new Date().toISOString().split('T')[0],
+      paid_amount:      '0',
+      notes:            data.notes || 'Web order — payment pending.',
+      reactivation_count: 0,
+      reactivation_notes: '',
+    };
+
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/License`, {
+        method: 'POST',
+        headers: {
+          'apikey':       SUPABASE_ANON_KEY,
+          'Authorization':'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer':       'resolution=merge-duplicates',
+        },
+        body: JSON.stringify(record),
+      });
+    } catch(e) {
+      console.warn('DB save failed:', e);
+    }
+  }
+
+  async function updateOrderPaid(data) {
+    try {
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/License?chip_id=eq.${data.chip.toUpperCase()}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey':       SUPABASE_ANON_KEY,
+            'Authorization':'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            payment_status: 'paid',
+            paid_amount:    '10',
+            notes: (data.notes || '') + ' | Web order paid ' + new Date().toISOString().split('T')[0],
+          }),
+        }
+      );
+    } catch(e) {
+      console.warn('Payment update failed:', e);
+    }
+
+    // Show confirmation regardless
+    document.getElementById('confirmEmail').textContent = data.email;
+    document.getElementById('buyStep2').style.display = 'none';
+    document.getElementById('buyStep3').style.display = 'block';
+    setBuyStep(3);
+  }
+
+  // ── Card number formatting ─────────────────────────────────────────────────
+  function fmtCard(el) {
+    let v = el.value.replace(/\D/g,'').substring(0,16);
+    el.value = v.replace(/(.{4})/g,'$1 ').trim();
+  }
+  function fmtExpiry(el) {
+    let v = el.value.replace(/\D/g,'').substring(0,4);
+    if (v.length > 2) v = v.substring(0,2) + '/' + v.substring(2);
+    el.value = v;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ACTIVATE TAB — Serial / Web Serial logic (unchanged)
+  // ══════════════════════════════════════════════════════════════════════════
+  let port = null, reader = null, writer = null, chipId = null, isLockedOut = false;
+
   if (!('serial' in navigator)) {
     document.getElementById('browserWarn').style.display = 'block';
     document.getElementById('btnConnect').disabled = true;
@@ -289,7 +642,6 @@
     t.appendChild(line);
     t.scrollTop = t.scrollHeight;
   }
-
   function logKey(msg, cls) {
     const t = document.getElementById('terminalKey');
     const line = document.createElement('div');
@@ -298,14 +650,12 @@
     t.appendChild(line);
     t.scrollTop = t.scrollHeight;
   }
-
   function setStep(n) {
     for (let i = 1; i <= 3; i++) {
       const el = document.getElementById('s' + i);
       el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
     }
   }
-
   function unlockKeyCard() {
     const card = document.getElementById('cardKey');
     card.style.opacity = '1';
@@ -319,23 +669,16 @@
     try {
       port = await navigator.serial.requestPort();
       await port.open({ baudRate: 115200 });
-
-      document.getElementById('connBadge').textContent  = 'Connected';
-      document.getElementById('connBadge').className    = 'badge badge-ok';
+      document.getElementById('connBadge').textContent = 'Connected';
+      document.getElementById('connBadge').className   = 'badge badge-ok';
       document.getElementById('btnConnect').disabled    = true;
       document.getElementById('btnDisconnect').disabled = false;
       document.getElementById('btnRequestId').disabled  = false;
       log('Serial port opened at 115200 baud.', 'line-ok');
-
-      // Set up writer
       writer = port.writable.getWriter();
-
-      // Read loop
       readLoop();
-
-      // Request chip ID automatically (device may have booted before we connected)
       setTimeout(() => requestId(), 500);
-    } catch (e) {
+    } catch(e) {
       log('Connection failed: ' + e.message, 'line-err');
     }
   }
@@ -344,7 +687,6 @@
     const decoder = new TextDecoderStream();
     port.readable.pipeTo(decoder.writable);
     reader = decoder.readable.getReader();
-
     let buffer = '';
     try {
       while (true) {
@@ -357,8 +699,6 @@
           const trimmed = line.trim();
           if (!trimmed) continue;
           log(trimmed);
-
-          // Auto-detect chip ID from licence output
           const m = trimmed.match(/Chip ID[:\s]+([0-9A-Fa-f]{12})/i);
           if (m && !chipId) {
             chipId = m[1].toUpperCase();
@@ -366,60 +706,42 @@
             log('Chip ID captured: ' + chipId, 'line-ok');
             unlockKeyCard();
           }
-
-          // Detect lockout status
           if (trimmed.includes('Status: LOCKED OUT') || trimmed.includes('LOCKED OUT')) {
-            if (!isLockedOut) {
-              isLockedOut = true;
-              switchToUnlockMode();
-            }
+            if (!isLockedOut) { isLockedOut = true; switchToUnlockMode(); }
           }
-
-          // Detect activation/unlock result
-          if (trimmed.includes('ACTIVATION SUCCESS')) {
-            showResult(true, false);
-          } else if (trimmed.includes('UNLOCK SUCCESS')) {
-            showResult(true, true);
-          } else if (trimmed.includes('INVALID KEY') || trimmed.includes('INVALID UNLOCK KEY')) {
+          if      (trimmed.includes('ACTIVATION SUCCESS'))  showResult(true, false);
+          else if (trimmed.includes('UNLOCK SUCCESS'))       showResult(true, true);
+          else if (trimmed.includes('INVALID KEY') || trimmed.includes('INVALID UNLOCK KEY'))
             logKey('Invalid key — check and try again.', 'line-err');
-          }
         }
       }
-    } catch (e) {
+    } catch(e) {
       log('Connection lost: ' + e.message, 'line-err');
     }
   }
 
   function switchToUnlockMode() {
-    document.getElementById('step2Title').textContent  = 'Step 2 — Enter Unlock Key';
+    document.getElementById('step2Title').textContent    = 'Step 2 — Enter Unlock Key';
     document.getElementById('step2Notice').style.display = 'none';
     document.getElementById('lockoutWarn').style.display = 'block';
-    document.getElementById('btnActivate').textContent = 'Unlock';
-    document.getElementById('btnActivate').className   = 'btn-danger';
+    document.getElementById('btnActivate').textContent   = 'Unlock';
+    document.getElementById('btnActivate').className     = 'btn-danger';
     log('Device is LOCKED OUT — switch to unlock key.', 'line-err');
     unlockKeyCard();
   }
 
   async function requestId() {
     if (!writer) return;
-    const enc = new TextEncoder();
-    await writer.write(enc.encode('LIC:INFO\n'));
+    await writer.write(new TextEncoder().encode('LIC:INFO\n'));
     log('Requesting Chip ID...', 'line-acc');
   }
 
   async function sendActivation() {
     const key = document.getElementById('keyInput').value.trim().toUpperCase();
-    if (key.length !== 8) {
-      logKey('Key must be exactly 8 characters.', 'line-err');
-      return;
-    }
-    if (!writer) {
-      logKey('No serial connection.', 'line-err');
-      return;
-    }
+    if (key.length !== 8) { logKey('Key must be exactly 8 characters.', 'line-err'); return; }
+    if (!writer)          { logKey('No serial connection.', 'line-err'); return; }
     const cmd = (isLockedOut ? 'LIC:UNLOCK ' : 'LIC:ACTIVATE ') + key + '\n';
-    const enc  = new TextEncoder();
-    await writer.write(enc.encode(cmd));
+    await writer.write(new TextEncoder().encode(cmd));
     logKey('Sent: ' + cmd.trim(), 'line-acc');
     setStep(3);
   }
@@ -431,12 +753,10 @@
     card.style.display = 'block';
     if (success) {
       if (wasUnlock) {
-        badge.textContent = 'Unlocked';
-        badge.className   = 'badge badge-ok';
+        badge.textContent = 'Unlocked'; badge.className = 'badge badge-ok';
         msg.textContent   = 'Device unlocked successfully. It will reboot to the activation screen. You can now activate it with a new activation key (€10).';
       } else {
-        badge.textContent = 'Activated';
-        badge.className   = 'badge badge-ok';
+        badge.textContent = 'Activated'; badge.className = 'badge badge-ok';
         msg.textContent   = 'Your device has been successfully activated and will reboot now. Thank you for choosing SolderWave.';
       }
       setStep(3);
@@ -450,7 +770,6 @@
       if (writer) { writer.releaseLock(); writer = null; }
       if (port)   { await port.close();   port   = null; }
     } catch(_) {}
-    // Reload page to fully release the serial port — safe to upload firmware after this
     location.reload();
   }
 </script>
