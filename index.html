@@ -65,6 +65,32 @@
     #browser-gate .copy-btn:active { opacity: 0.8; }
     #browser-gate .gate-note { color: #555; font-size: 0.8rem; }
 
+    /* ── Port picker ── */
+    .port-list { margin: 12px 0 8px; display: flex; flex-direction: column; gap: 6px; }
+    .port-item {
+      display: flex; align-items: center; gap: 12px;
+      background: #111; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; transition: border-color 0.15s;
+    }
+    .port-item:hover { border-color: var(--accent); }
+    .port-item .port-info { flex: 1; }
+    .port-item .port-name { font-size: 0.9rem; color: var(--text); }
+    .port-item .port-vid  { font-size: 0.75rem; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+    .port-item .btn-port-connect {
+      background: var(--accent); color: #000; border: none;
+      border-radius: 6px; padding: 7px 16px; font-size: 0.85rem;
+      font-weight: 700; cursor: pointer; white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .port-item .btn-port-connect:hover { opacity: 0.85; }
+    .port-add-btn {
+      background: transparent; border: 1px dashed var(--border);
+      color: var(--muted); border-radius: 8px; padding: 9px 14px;
+      font-size: 0.85rem; cursor: pointer; width: 100%;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .port-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -340,10 +366,13 @@
       <span class="info-value highlight" id="chipIdDisplay">—</span>
     </div>
     <div class="terminal" id="terminal"><span class="line-acc">Waiting for device...</span></div>
-    <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
-      <button class="btn-primary"  id="btnConnect"    onclick="connectSerial()">⚡ Connect USB</button>
-      <button class="btn-outline"  id="btnRequestId"  onclick="requestId()"         disabled>Request Chip ID</button>
-      <button class="btn-outline"  id="btnDisconnect" onclick="disconnectSerial()"   disabled>Disconnect</button>
+    <div id="portPickerWrap" style="margin-top:14px;">
+      <div id="portList" class="port-list" style="display:none;"></div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+        <button class="btn-primary"  id="btnScan"       onclick="scanPorts()">⚡ Scan for Device</button>
+        <button class="btn-outline"  id="btnRequestId"  onclick="requestId()"        disabled>Request Chip ID</button>
+        <button class="btn-outline"  id="btnDisconnect" onclick="disconnectSerial()"  disabled>Disconnect</button>
+      </div>
     </div>
   </div>
 
@@ -726,10 +755,108 @@
   // ACTIVATE TAB — Serial / Web Serial logic (unchanged)
   // ══════════════════════════════════════════════════════════════════════════
   let port = null, reader = null, writer = null, chipId = null, isLockedOut = false;
+  let _availablePorts = [];
 
   if (!('serial' in navigator)) {
     document.getElementById('browserWarn').style.display = 'block';
-    document.getElementById('btnConnect').disabled = true;
+    document.getElementById('btnScan').disabled = true;
+  }
+
+  function getPortLabel(vid, pid) {
+    const known = {
+      '10C4:EA60': 'CP210x USB-UART Bridge',
+      '1A86:7523': 'CH340 USB-UART Bridge',
+      '1A86:55D4': 'CH9102 USB-UART Bridge',
+      '0403:6001': 'FTDI USB-UART Bridge',
+      '0403:6015': 'FTDI USB-UART Bridge',
+      '2341:0043': 'Arduino',
+    };
+    if (!vid) return 'USB Serial Device';
+    const key = vid.toString(16).toUpperCase().padStart(4,'0') + ':' +
+                (pid||0).toString(16).toUpperCase().padStart(4,'0');
+    return known[key] || 'USB Serial Device';
+  }
+
+  function renderPortList() {
+    const wrap = document.getElementById('portList');
+    wrap.innerHTML = '';
+    if (_availablePorts.length === 0) {
+      wrap.style.display = 'none';
+      return;
+    }
+    wrap.style.display = 'flex';
+    _availablePorts.forEach((p, i) => {
+      const info = p.getInfo ? p.getInfo() : {};
+      const vid  = info.usbVendorId;
+      const pid  = info.usbProductId;
+      const label = getPortLabel(vid, pid);
+      const vidStr = vid ? 'VID:0x' + vid.toString(16).toUpperCase().padStart(4,'0') +
+                           '  PID:0x' + (pid||0).toString(16).toUpperCase().padStart(4,'0') : 'Unknown';
+      const row = document.createElement('div');
+      row.className = 'port-item';
+      row.innerHTML = `<div class="port-info">
+          <div class="port-name">${label}</div>
+          <div class="port-vid">${vidStr}</div>
+        </div>
+        <button class="btn-port-connect" onclick="connectPort(${i})">Connect</button>`;
+      wrap.appendChild(row);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.className = 'port-add-btn';
+    addBtn.textContent = '+ Add / show a different port';
+    addBtn.onclick = requestNewPort;
+    wrap.appendChild(addBtn);
+  }
+
+  async function scanPorts() {
+    try {
+      _availablePorts = await navigator.serial.getPorts();
+      if (_availablePorts.length > 0) {
+        renderPortList();
+        log('Found ' + _availablePorts.length + ' port(s) — select one to connect.', 'line-acc');
+      } else {
+        log('No previously granted ports found — requesting access...', 'line-acc');
+        requestNewPort();
+      }
+    } catch(e) {
+      log('Scan failed: ' + e.message, 'line-err');
+    }
+  }
+
+  async function requestNewPort() {
+    try {
+      const p = await navigator.serial.requestPort();
+      if (!_availablePorts.includes(p)) _availablePorts.push(p);
+      renderPortList();
+      // auto-connect the newly granted port
+      await openPort(p);
+    } catch(e) {
+      if (e.name !== 'NotFoundError') log('Port request failed: ' + e.message, 'line-err');
+    }
+  }
+
+  async function connectPort(index) {
+    await openPort(_availablePorts[index]);
+  }
+
+  async function openPort(p) {
+    try {
+      port = p;
+      await port.open({ baudRate: 115200 });
+      document.getElementById('connBadge').textContent = 'Connected';
+      document.getElementById('connBadge').className   = 'badge badge-ok';
+      document.getElementById('btnScan').disabled       = true;
+      document.getElementById('portList').style.display = 'none';
+      document.getElementById('btnRequestId').disabled  = false;
+      document.getElementById('btnDisconnect').disabled = false;
+      log('Serial port opened at 115200 baud.', 'line-ok');
+      writer = port.writable.getWriter();
+      readLoop();
+      setTimeout(() => requestId(), 500);
+    } catch(e) {
+      log('Connection failed: ' + e.message, 'line-err');
+      port = null;
+    }
   }
 
   function log(msg, cls) {
@@ -763,23 +890,6 @@
     setStep(2);
   }
 
-  async function connectSerial() {
-    try {
-      port = await navigator.serial.requestPort();
-      await port.open({ baudRate: 115200 });
-      document.getElementById('connBadge').textContent = 'Connected';
-      document.getElementById('connBadge').className   = 'badge badge-ok';
-      document.getElementById('btnConnect').disabled    = true;
-      document.getElementById('btnDisconnect').disabled = false;
-      document.getElementById('btnRequestId').disabled  = false;
-      log('Serial port opened at 115200 baud.', 'line-ok');
-      writer = port.writable.getWriter();
-      readLoop();
-      setTimeout(() => requestId(), 500);
-    } catch(e) {
-      log('Connection failed: ' + e.message, 'line-err');
-    }
-  }
 
   async function readLoop() {
     const decoder = new TextDecoderStream();
@@ -853,12 +963,34 @@
       if (wasUnlock) {
         badge.textContent = 'Unlocked'; badge.className = 'badge badge-ok';
         msg.textContent   = 'Device unlocked successfully. It will reboot to the activation screen. You can now activate it with a new activation key (€10).';
+        updateDeviceStatus('unlocked');
       } else {
         badge.textContent = 'Activated'; badge.className = 'badge badge-ok';
         msg.textContent   = 'Your device has been successfully activated and will reboot now. Thank you for choosing SolderWave.';
+        updateDeviceStatus('activated');
       }
       setStep(3);
       document.getElementById('s3').className = 'step done';
+    }
+  }
+
+  async function updateDeviceStatus(newStatus) {
+    if (!chipId) return;
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/License?chip_id=eq.${chipId}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey':        SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({
+          status:          newStatus,
+          activation_date: new Date().toISOString().split('T')[0],
+        }),
+      });
+    } catch(e) {
+      console.warn('DB status update failed:', e);
     }
   }
 
