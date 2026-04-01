@@ -18,6 +18,53 @@
       --mono:    'Courier New', monospace;
     }
 
+    /* ── Browser gate overlay ── */
+    #browser-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.93);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    #browser-gate .gate-box {
+      background: #1a1a1a;
+      border: 1px solid #f0a500;
+      border-radius: 12px;
+      max-width: 480px; width: 100%;
+      padding: 40px 36px;
+      text-align: center;
+    }
+    #browser-gate .gate-icon { font-size: 3rem; margin-bottom: 16px; }
+    #browser-gate h2 { color: #f0a500; font-size: 1.3rem; margin-bottom: 12px; }
+    #browser-gate p  { color: #aaa; font-size: 0.92rem; line-height: 1.6; margin-bottom: 20px; }
+    #browser-gate .gate-browsers {
+      display: flex; gap: 16px; justify-content: center; margin-bottom: 28px;
+    }
+    #browser-gate .gate-browsers a {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      color: #e8e8e8; text-decoration: none; font-size: 0.85rem;
+      background: #252525; border: 1px solid #333; border-radius: 8px;
+      padding: 14px 20px; transition: border-color 0.2s;
+    }
+    #browser-gate .gate-browsers a:hover { border-color: #f0a500; }
+    #browser-gate .gate-browsers a span { font-size: 1.8rem; }
+    #browser-gate .copy-row {
+      display: flex; gap: 8px; align-items: center;
+      background: #111; border: 1px solid #333; border-radius: 6px;
+      padding: 8px 12px; margin-bottom: 8px;
+    }
+    #browser-gate .copy-row code {
+      flex: 1; color: #f0a500; font-size: 0.8rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      text-align: left;
+    }
+    #browser-gate .copy-btn {
+      background: #f0a500; color: #000; border: none;
+      border-radius: 4px; padding: 5px 12px; font-size: 0.82rem;
+      cursor: pointer; white-space: nowrap; font-weight: 600;
+    }
+    #browser-gate .copy-btn:active { opacity: 0.8; }
+    #browser-gate .gate-note { color: #555; font-size: 0.8rem; }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -224,6 +271,35 @@
   </style>
 </head>
 <body>
+
+<!-- Browser compatibility gate — hidden on Chrome/Edge, shown on Safari/Firefox -->
+<div id="browser-gate" style="display:none">
+  <div class="gate-box">
+    <div class="gate-icon">⚠️</div>
+    <h2>Chrome or Edge Required</h2>
+    <p>
+      This page uses the <strong style="color:#e8e8e8">Web Serial API</strong> to talk directly
+      to your SolderWave device via USB.<br><br>
+      Safari and Firefox do not support this technology.
+      Please open this page in <strong style="color:#e8e8e8">Google Chrome</strong> or
+      <strong style="color:#e8e8e8">Microsoft Edge</strong> to continue.
+    </p>
+    <div class="gate-browsers">
+      <a href="https://www.google.com/chrome/" target="_blank">
+        <span>&#x1F7E1;</span>Google Chrome
+      </a>
+      <a href="https://www.microsoft.com/edge" target="_blank">
+        <span>&#x1F535;</span>Microsoft Edge
+      </a>
+    </div>
+    <p style="color:#888;font-size:0.85rem;margin-bottom:10px;">Or copy this link and paste it into Chrome:</p>
+    <div class="copy-row">
+      <code id="gate-url"></code>
+      <button class="copy-btn" onclick="gateCopyLink()">Copy</button>
+    </div>
+    <p class="gate-note" id="gate-copy-confirm">&nbsp;</p>
+  </div>
+</div>
 
 <header>
   <h1>SolderWave</h1>
@@ -437,6 +513,28 @@
 </footer>
 
 <script>
+  // ── Browser gate ─────────────────────────────────────────────────────────
+  (function() {
+    const ua = navigator.userAgent;
+    const isChrome = /Chrome\//.test(ua) && !/Edg\//.test(ua) && !/OPR\//.test(ua);
+    const isEdge   = /Edg\//.test(ua);
+    if (!isChrome && !isEdge) {
+      const gate = document.getElementById('browser-gate');
+      gate.style.display = 'flex';
+      document.getElementById('gate-url').textContent = window.location.href;
+    }
+  })();
+
+  function gateCopyLink() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+      document.getElementById('gate-copy-confirm').textContent = '✓ Link copied — paste into Chrome';
+      document.getElementById('gate-copy-confirm').style.color = '#3ecf6e';
+    }).catch(function() {
+      document.getElementById('gate-copy-confirm').textContent = window.location.href;
+      document.getElementById('gate-copy-confirm').style.color = '#f0a500';
+    });
+  }
+
   // ── Supabase config ───────────────────────────────────────────────────────
   const SUPABASE_URL = 'https://juzxfpcrplylliahpari.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_ymckgeXu6mYmPov9E4cguA__dgzX2L3';
