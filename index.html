@@ -456,10 +456,14 @@
       It looks like: <span style="font-family:var(--mono);color:var(--accent);">F4F596A7DBCC</span>
     </p>
 
-    <div style="margin-top:20px;">
+    <div style="margin-top:20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
       <button class="btn-primary" id="btnBuyNext1" onclick="buyNext1()" disabled>
         Continue to Payment →
       </button>
+      <a href="#" onclick="fillTestData(); return false;"
+         style="font-size:0.8rem; color:var(--muted); text-decoration:underline;">
+        Fill test data
+      </a>
     </div>
     <p id="buyStep1Status" class="notice" style="margin-top:10px;color:var(--red);"></p>
   </div>
@@ -640,6 +644,14 @@
     setTimeout(() => {
       updateOrderPaid(_buyData);
     }, 1800);
+  }
+
+  function fillTestData() {
+    document.getElementById('buyName').value  = 'Test Customer';
+    document.getElementById('buyEmail').value = 'test@solderwave.ing';
+    document.getElementById('buyChip').value  = 'AABBCCDDEEFF';
+    document.getElementById('buyNotes').value = 'Test order — do not process';
+    checkBuyStep1();
   }
 
   function buyReset() {
