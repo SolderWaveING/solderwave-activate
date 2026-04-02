@@ -647,6 +647,8 @@
           statusEl.style.color = 'var(--red)';
           btn.disabled    = false;
           btn.textContent = 'Continue to Payment →';
+          // Log to fraud_log silently
+          logFraudAttempt(chip, name, email, existing.customer_name || '');
           return;
         }
       }
@@ -838,6 +840,30 @@
       const el = document.getElementById('emailSendStatus');
       if (el) el.textContent = 'Note: confirmation email could not be sent (' + (e.text || e.message || e) + ')';
     }
+  }
+
+  // ── Fraud logging ─────────────────────────────────────────────────────────
+  async function logFraudAttempt(chip, attemptedName, attemptedEmail, existingOwner) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/fraud_log`, {
+        method: 'POST',
+        headers: {
+          'apikey':        SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({
+          attempted_at:      new Date().toISOString().split('T')[0],
+          chip_id:           chip,
+          attempted_name:    attemptedName,
+          attempted_email:   attemptedEmail,
+          existing_owner:    existingOwner,
+          customer_ip:       _clientIp + (_clientCountry ? ' (' + _clientCountry + ')' : ''),
+          customer_location: _clientLocation,
+          notes:             'Duplicate activation attempt blocked on website.',
+        }),
+      });
+    } catch(e) { console.warn('Fraud log failed:', e); }
   }
 
   // ── Card number formatting ─────────────────────────────────────────────────
