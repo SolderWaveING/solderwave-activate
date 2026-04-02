@@ -535,7 +535,8 @@
       Once you receive it, use the <a href="#" onclick="switchTab('activate'); return false;"
         style="color:var(--accent)">⚡ Activate Device</a> tab to unlock your device.
     </p>
-    <div style="margin-top:24px;">
+    <p id="emailSendStatus" style="color:var(--red);font-size:0.8rem;margin-top:12px;"></p>
+    <div style="margin-top:12px;">
       <button class="btn-outline" onclick="buyReset()">Place Another Order</button>
     </div>
   </div>
@@ -690,22 +691,24 @@
 
   // ── Supabase DB calls ─────────────────────────────────────────────────────
   async function savePendingOrder(data) {
-    // Fetch next serial number
-    let serial = 'SMBP-V1-???';
+    // Fetch next serial number — only consider rows matching SMBP-V1-NNN pattern
+    let serial = 'SMBP-V1-001';
     try {
       const r = await fetch(
-        `${SUPABASE_URL}/rest/v1/License?select=serial_number&order=serial_number.desc&limit=1`,
+        `${SUPABASE_URL}/rest/v1/License?select=serial_number&serial_number=like.SMBP-V1-*&order=serial_number.desc&limit=10`,
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
       );
       const rows = await r.json();
+      let maxNum = 0;
       if (rows && rows.length) {
-        const last = rows[0].serial_number || 'SMBP-V1-000';
-        const num  = parseInt(last.split('-').pop()) + 1;
-        serial = 'SMBP-V1-' + String(num).padStart(3, '0');
-      } else {
-        serial = 'SMBP-V1-001';
+        for (const row of rows) {
+          const parts = (row.serial_number || '').split('-');
+          const n = parseInt(parts[parts.length - 1]);
+          if (!isNaN(n) && n > maxNum) maxNum = n;
+        }
       }
-    } catch(e) { serial = 'SMBP-V1-???'; }
+      serial = 'SMBP-V1-' + String(maxNum + 1).padStart(3, '0');
+    } catch(e) { serial = 'SMBP-V1-001'; }
 
     const record = {
       chip_id:          data.chip.toUpperCase(),
@@ -770,18 +773,21 @@
   }
 
   async function sendOrderConfirmation(data) {
-    if (EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') return; // not configured yet
+    if (EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') return;
     try {
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_name:       data.name,
-        to_email:      data.email,
-        chip_id:       data.chip.toUpperCase(),
-        order_date:    new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }),
-        reply_to:      'support@solderwave.ing',
+      const result = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_name:    data.name,
+        to_email:   data.email,
+        chip_id:    data.chip.toUpperCase(),
+        order_date: new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }),
+        reply_to:   'support@solderwave.ing',
       });
-      console.log('Order confirmation sent to', data.email);
+      console.log('Order confirmation sent:', result.status, result.text);
     } catch(e) {
-      console.warn('EmailJS send failed:', e);
+      console.error('EmailJS send failed:', e);
+      // Show visible error on the confirmation page
+      const el = document.getElementById('emailSendStatus');
+      if (el) el.textContent = 'Note: confirmation email could not be sent (' + (e.text || e.message || e) + ')';
     }
   }
 
