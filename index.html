@@ -689,6 +689,18 @@
     }
   }
 
+  // ── IP lookup ─────────────────────────────────────────────────────────────
+  let _clientIp = '';
+  let _clientCountry = '';
+  (async function fetchIp() {
+    try {
+      const r = await fetch('https://ipapi.co/json/');
+      const d = await r.json();
+      _clientIp      = d.ip      || '';
+      _clientCountry = d.country || '';
+    } catch(e) { _clientIp = 'unknown'; }
+  })();
+
   // ── Supabase DB calls ─────────────────────────────────────────────────────
   async function savePendingOrder(data) {
     // Fetch next serial number — only consider rows matching SMBP-V1-NNN pattern
@@ -722,6 +734,11 @@
       notes:            data.notes || 'Web order — payment pending.',
       reactivation_count: 0,
       reactivation_notes: '',
+      customer_ip:      _clientIp + (_clientCountry ? ' (' + _clientCountry + ')' : ''),
+      activation_ip:    '',
+      activation_method: '',
+      kyc_review:       false,
+      kyc_notes:        '',
     };
 
     try {
@@ -1028,6 +1045,28 @@
   async function updateDeviceStatus(newStatus) {
     if (!chipId) return;
     try {
+      // Fetch existing record to compare order country vs activation country
+      const existing = await fetch(
+        `${SUPABASE_URL}/rest/v1/License?chip_id=eq.${chipId}&select=customer_ip`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      ).then(r => r.json());
+
+      const orderIp      = existing && existing[0] ? (existing[0].customer_ip || '') : '';
+      const orderCountry = orderIp.match(/\(([A-Z]{2})\)/)?.[1] || '';
+      const actIp        = _clientIp + (_clientCountry ? ' (' + _clientCountry + ')' : '');
+      const flagKyc      = orderCountry && _clientCountry && orderCountry !== _clientCountry;
+
+      const patch = {
+        status:           newStatus,
+        activation_date:  new Date().toISOString().split('T')[0],
+        activation_ip:    actIp,
+        activation_method: 'auto',
+      };
+      if (flagKyc) {
+        patch.kyc_review = true;
+        patch.kyc_notes  = `IP mismatch: ordered from ${orderCountry}, activated from ${_clientCountry} (${actIp})`;
+      }
+
       await fetch(`${SUPABASE_URL}/rest/v1/License?chip_id=eq.${chipId}`, {
         method: 'PATCH',
         headers: {
@@ -1035,10 +1074,7 @@
           'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
           'Content-Type':  'application/json',
         },
-        body: JSON.stringify({
-          status:          newStatus,
-          activation_date: new Date().toISOString().split('T')[0],
-        }),
+        body: JSON.stringify(patch),
       });
     } catch(e) {
       console.warn('DB status update failed:', e);
