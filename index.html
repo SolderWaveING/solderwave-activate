@@ -547,7 +547,19 @@
   <p>&copy; 2026 SolderWave — <a href="mailto:support@solderwave.ing">support@solderwave.ing</a></p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+  // ── EmailJS config ────────────────────────────────────────────────────────
+  // Sign up free at https://www.emailjs.com — fill in your IDs below
+  const EMAILJS_PUBLIC_KEY  = 'YOUR_EMAILJS_PUBLIC_KEY';   // Account → API Keys
+  const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';           // Email Services tab
+  const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';          // Email Templates tab
+  (function() {
+    if (EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
+      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    }
+  })();
+
   // ── Browser gate ─────────────────────────────────────────────────────────
   (function() {
     const ua = navigator.userAgent;
@@ -752,6 +764,25 @@
     document.getElementById('buyStep2').style.display = 'none';
     document.getElementById('buyStep3').style.display = 'block';
     setBuyStep(3);
+
+    // Send order confirmation email to customer
+    sendOrderConfirmation(data);
+  }
+
+  async function sendOrderConfirmation(data) {
+    if (EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') return; // not configured yet
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_name:       data.name,
+        to_email:      data.email,
+        chip_id:       data.chip.toUpperCase(),
+        order_date:    new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }),
+        reply_to:      'support@solderwave.ing',
+      });
+      console.log('Order confirmation sent to', data.email);
+    } catch(e) {
+      console.warn('EmailJS send failed:', e);
+    }
   }
 
   // ── Card number formatting ─────────────────────────────────────────────────
