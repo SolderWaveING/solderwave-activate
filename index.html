@@ -622,11 +622,38 @@
     document.getElementById(id).addEventListener('input', checkBuyStep1);
   });
 
-  function buyNext1() {
+  async function buyNext1() {
     const name  = document.getElementById('buyName').value.trim();
     const email = document.getElementById('buyEmail').value.trim();
     const chip  = document.getElementById('buyChip').value.trim().toUpperCase();
     const notes = document.getElementById('buyNotes').value.trim();
+    const btn   = document.getElementById('btnBuyNext1');
+    const statusEl = document.getElementById('buyStep1Status');
+
+    // ── Duplicate chip check ──
+    btn.disabled    = true;
+    btn.textContent = 'Checking...';
+    statusEl.textContent = '';
+    try {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/License?chip_id=eq.${chip}&select=chip_id,status,customer_name`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      );
+      const rows = await r.json();
+      if (rows && rows.length > 0) {
+        const existing = rows[0];
+        if (existing.status === 'activated') {
+          statusEl.textContent = `This device (${chip}) is already activated. If you need help, contact support@solderwave.ing`;
+          statusEl.style.color = 'var(--red)';
+          btn.disabled    = false;
+          btn.textContent = 'Continue to Payment →';
+          return;
+        }
+      }
+    } catch(e) { /* allow through if check fails */ }
+
+    btn.disabled    = false;
+    btn.textContent = 'Continue to Payment →';
 
     _buyData = { name, email, chip, notes };
 
@@ -634,7 +661,7 @@
     document.getElementById('summaryChip').textContent = chip;
     document.getElementById('summaryName').textContent = name;
 
-    // Save to DB immediately (status: pending_payment)
+    // Save to DB
     savePendingOrder(_buyData);
 
     // Move to step 2
@@ -690,14 +717,18 @@
   }
 
   // ── IP lookup ─────────────────────────────────────────────────────────────
-  let _clientIp = '';
-  let _clientCountry = '';
+  let _clientIp       = '';
+  let _clientCountry  = '';
+  let _clientLocation = '';
   (async function fetchIp() {
     try {
       const r = await fetch('https://ipapi.co/json/');
       const d = await r.json();
-      _clientIp      = d.ip      || '';
-      _clientCountry = d.country || '';
+      _clientIp       = d.ip           || '';
+      _clientCountry  = d.country      || '';
+      const city      = d.city         || '';
+      const country   = d.country_name || _clientCountry;
+      _clientLocation = [city, country].filter(Boolean).join(', ');
     } catch(e) { _clientIp = 'unknown'; }
   })();
 
@@ -734,11 +765,12 @@
       notes:            data.notes || 'Web order — payment pending.',
       reactivation_count: 0,
       reactivation_notes: '',
-      customer_ip:      _clientIp + (_clientCountry ? ' (' + _clientCountry + ')' : ''),
-      activation_ip:    '',
+      customer_ip:       _clientIp + (_clientCountry ? ' (' + _clientCountry + ')' : ''),
+      customer_location: _clientLocation,
+      activation_ip:     '',
       activation_method: '',
-      kyc_review:       false,
-      kyc_notes:        '',
+      kyc_review:        false,
+      kyc_notes:         '',
     };
 
     try {
